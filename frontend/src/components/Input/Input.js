@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import './Input.css';
 
-const Input = ({ onSend }) => {
+const Input = ({ onSend, disabled }) => {
   const [text, setText] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (text.trim()) {
+    if (text.trim() && !disabled) {
       onSend(text);
       setText('');
     }
@@ -19,8 +19,11 @@ const Input = ({ onSend }) => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Décrivez la situation..."
+        disabled={disabled}
       />
-      <button type="submit">Envoyer</button>
+      <button type="submit" disabled={disabled}>
+        Envoyer
+      </button>
     </form>
   );
 };
