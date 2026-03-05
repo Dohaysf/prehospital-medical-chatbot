@@ -2,38 +2,45 @@ import React from 'react';
 import './ESOSummary.css';
 
 const ESOSummary = ({ summary }) => {
-  // Fonction pour formater les clés en français lisible
+  // Mapping des clés techniques vers des libellés français
   const formatKey = (key) => {
-    const map = {
+    const labels = {
       symptom: 'Symptôme',
       location: 'Localisation',
       duration: 'Durée',
       intensity: 'Intensité (/10)',
+      age: 'Âge',
+      gender: 'Sexe',
       medicalHistory: 'Antécédents',
-      medication: 'Traitements',
-      // Ajoutez d'autres correspondances
+      medication: 'Traitements en cours',
     };
-    return map[key] || key.charAt(0).toUpperCase() + key.slice(1);
+    return labels[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
 
-  // Vérifier si le résumé est vide
+  // Valeur par défaut si aucune info
   const isEmpty = Object.keys(summary).length === 0;
 
   return (
-    <div className="eso-summary-card">
-      <div className="eso-summary-header">
-        <h3>Résumé pré-ESO</h3>
-        <span className="badge">{isEmpty ? 'En attente' : 'En cours'}</span>
+    <div className="eso-card">
+      <div className="eso-header">
+        <h3>📋 Résumé pré-ESO</h3>
+        <span className={`status-badge ${isEmpty ? 'waiting' : 'in-progress'}`}>
+          {isEmpty ? 'En attente' : 'En cours'}
+        </span>
       </div>
-      <div className="eso-summary-body">
+
+      <div className="eso-body">
         {isEmpty ? (
-          <p className="empty-message">Aucune information collectée pour l'instant.</p>
+          <p className="empty-state">
+            Aucune information pour l'instant.<br />
+            Commencez la conversation avec l'assistant.
+          </p>
         ) : (
-          <ul className="summary-list">
+          <ul className="eso-list">
             {Object.entries(summary).map(([key, value]) => (
-              <li key={key} className="summary-item">
-                <span className="summary-key">{formatKey(key)}</span>
-                <span className="summary-value">{value}</span>
+              <li key={key} className="eso-item">
+                <span className="eso-key">{formatKey(key)}</span>
+                <span className="eso-value">{value}</span>
               </li>
             ))}
           </ul>
