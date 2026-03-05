@@ -1,0 +1,55 @@
+{
+  "intents": [
+    {
+      "name": "douleur_poitrine",
+      "patterns": [
+        "mal à la poitrine",
+        "douleur thoracique",
+        "oppression poitrine",
+        "cœur",
+        "poitrine serrée"
+      ],
+      "responses": [
+        "Une douleur à la poitrine peut être grave. Ne bougez pas, nous envoyons une ambulance."
+      ]
+    },
+    {
+      "name": "difficulte_respiratoire",
+      "patterns": [
+        "difficulté à respirer",
+        "essoufflement",
+        "respire mal",
+        "souffle court",
+        "étouffement"
+      ],
+      "responses": [
+        "Avez-vous des antécédents respiratoires ? Essayez de rester assis et de respirer calmement."
+      ]
+    },
+    {
+      "name": "accident",
+      "patterns": [
+        "accident",
+        "chute",
+        "blessure",
+        "coup",
+        "traumatisme"
+      ],
+      "responses": [
+        "Où avez-vous mal ? Y a-t-il une blessure visible ?"
+      ]
+    },
+    {
+      "name": "information_generale",
+      "patterns": [
+        "information",
+        "renseignement",
+        "question",
+        "aide"
+      ],
+      "responses": [
+        "Je suis là pour vous aider. Décrivez votre situation."
+      ]
+    }
+  ]
+}
