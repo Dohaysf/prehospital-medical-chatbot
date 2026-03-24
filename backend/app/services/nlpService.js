@@ -1,54 +1,45 @@
-// backend/app/services/nlpService.js
+const fs = require("fs");
+const path = require("path");
 
-const fs = require('fs');
-const path = require('path');
-
-// Fonction pour enlever les accents
 const removeAccents = (str) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
-// Charger les intents depuis le fichier JSON
-const intentsPath = path.join(__dirname, '../../data/intents.json');
-let intentsData;
+const intentsPath = path.join(__dirname, "../../data/intents.json");
+let intentsData = [];
 try {
-  const rawData = fs.readFileSync(intentsPath, 'utf8');
+  const rawData = fs.readFileSync(intentsPath, "utf8");
   intentsData = JSON.parse(rawData).intents;
 } catch (err) {
-  console.error('Erreur chargement intents.json :', err.message);
-  intentsData = []; // fallback vide
+  console.error("Erreur chargement intents.json :", err.message);
 }
 
-// Liste de mots-clés pour les symptômes
+// --- 1. SYMPTÔMES enrichis ---
 const SYMPTOM_KEYWORDS = {
-  douleur: ['mal', 'douleur', 'douloureux', 'fait mal'],
-  dyspnée: ['respire', 'souffle', 'essoufflement', 'oppression'],
-  cardiaque: ['cœur', 'cardiaque', 'poitrine', 'thorax'],
-  nausée: ['nausée', 'vomit', 'vomissement', 'mal au cœur'],
-  fièvre: ['fièvre', 'température', 'chaud'],
-  traumatisme: ['chute', 'accident', 'coup', 'blessure'],
-  perte_connaissance: ['évanouissement', 'inconscient', 'perdu connaissance'],
-  saignement: ['saigne', 'sang', 'hémorragie'],
+  douleur: ["mal", "douleur", "douloureux", "douleurs"],
+  dyspnee: ["respire", "essoufflement", "souffle", "oppression"],
+  cardiaque: ["coeur", "cardiaque", "poitrine", "thorax"],
+  nausee: ["nausée", "vomissement", "mal au coeur"],
+  fievre: ["fièvre", "temperature", "chaud", "frissons"],
+  traumatisme: ["chute", "accident", "coup", "blessure", "traumatisme"],
+  saignement: ["saigne", "sang", "hémorragie", "ecoulement"],
+  brulure: ["brûlure", "brulure", "crampe", "picotement", "engourdissement"],
 };
 
-// Parties du corps avec variantes (avec et sans accents)
+// --- 2. PARTIES DU CORPS enrichies ---
 const BODY_PARTS = {
-  tête: ['tête', 'tete'],
-  ventre: ['ventre'],
-  poitrine: ['poitrine', 'thorax'],
-  dos: ['dos'],
-  jambe: ['jambe'],
-  bras: ['bras'],
-  cou: ['cou'],
-  abdomen: ['abdomen'],
-  épaule: ['épaule', 'epaule'],
-  genou: ['genou'],
-  pied: ['pied'],
-  main: ['main'],
-  côte: ['côte', 'cote']
+  tete: ["tête", "tete", "crâne", "front", "nuque"],
+  poitrine: ["poitrine", "thorax", "sternum"],
+  ventre: ["ventre", "abdomen", "estomac"],
+  dos: ["dos", "lombaires"],
+  jambe: ["jambe", "cuisse", "mollet", "genou"],
+  bras: ["bras", "avant-bras", "coude", "épaule"],
+  cou: ["cou", "nuque"],
+  pied: ["pied", "cheville"],
+  main: ["main", "poignet"],
 };
 
-// Détection de l'intent à partir du message
+// --- 3. Détection d'intent ---
 const detectIntent = (message) => {
   const lower = removeAccents(message.toLowerCase());
   for (const intent of intentsData) {
@@ -58,108 +49,159 @@ const detectIntent = (message) => {
       }
     }
   }
-  return 'information_generale'; // intent par défaut
+  return "information_generale";
 };
 
-const extractInfo = (message, currentSummary) => {
+// --- 4. Conversion intensité naturelle ---
+const naturalIntensity = (phrase) => {
+  const map = {
+    "très fort": 8,
+    "fort": 7,
+    "moyen": 5,
+    "léger": 3,
+    "très léger": 2,
+    "insupportable": 10,
+    "atroce": 10,
+    "faible": 2,
+    "modéré": 5,
+  };
+  for (const [key, val] of Object.entries(map)) {
+    if (phrase.includes(key)) return val;
+  }
+  return null;
+};
+
+// --- 5. Validation ---
+const isValidAge = (age) => {
+  return Number.isInteger(age) && age >= 0 && age <= 120;
+};
+const isValidIntensity = (intensity) => {
+  return Number.isInteger(intensity) && intensity >= 1 && intensity <= 10;
+};
+
+// --- 6. Extraction (multi-informations) ---
+const extractInfo = (message, summary) => {
   const lower = removeAccents(message.toLowerCase());
   const info = {};
 
-  // 1. Symptôme
+  // 6.1 Symptôme
   for (const [symptom, keywords] of Object.entries(SYMPTOM_KEYWORDS)) {
-    const normalizedKeywords = keywords.map(k => removeAccents(k.toLowerCase()));
-    if (normalizedKeywords.some(keyword => lower.includes(keyword))) {
+    const normalized = keywords.map((k) => removeAccents(k));
+    if (normalized.some((k) => lower.includes(k))) {
       info.symptom = symptom;
       break;
     }
   }
 
-  // 2. Localisation
+  // 6.2 Partie du corps
   for (const [part, variants] of Object.entries(BODY_PARTS)) {
-    const normalizedVariants = variants.map(v => removeAccents(v.toLowerCase()));
-    if (normalizedVariants.some(v => lower.includes(v))) {
-      info.location = part;
+    const normalized = variants.map((v) => removeAccents(v));
+    if (normalized.some((v) => lower.includes(v))) {
+      info.bodyPart = part;
       break;
     }
   }
 
-  // 3. Durée
-  const durationMatch = lower.match(/(depuis\s+)?(\d+)\s*(heure|jour|minute|h|j)(s?)/i);
-  if (durationMatch) {
-    info.duration = durationMatch[2] + ' ' + durationMatch[3] + (durationMatch[4] ? 's' : '');
-  }
-
-  // 4. Intensité
-  let intensityMatch = lower.match(/(\d+)\s*\/\s*10|(\d+)\s*sur\s*10|intensité\s*(\d+)|(\d+)\s*sur\s*une\s*échelle\s*de\s*\d+/i);
-  if (!intensityMatch && !currentSummary.intensity) {
-    const justNumber = lower.match(/^\s*(\d+)\s*$/);
-    if (justNumber) {
-      intensityMatch = justNumber;
+  // 6.3 Durée (expressions relatives + nombres)
+  let durationStr = null;
+  if (lower.includes("depuis hier")) durationStr = "1 jour";
+  else if (lower.includes("depuis ce matin")) durationStr = "quelques heures";
+  else if (lower.includes("depuis ce soir")) durationStr = "quelques heures";
+  else if (lower.includes("depuis une heure")) durationStr = "1 heure";
+  else if (lower.includes("depuis deux heures")) durationStr = "2 heures";
+  else if (lower.includes("depuis trois heures")) durationStr = "3 heures";
+  else {
+    const durationMatch = lower.match(/(\d+)\s*(minute|minutes|heure|heures|jour|jours|h|min|j)/);
+    if (durationMatch) {
+      durationStr = durationMatch[1] + " " + durationMatch[2];
     }
   }
+  if (durationStr) info.duration = durationStr;
+
+  // 6.4 Intensité (nombre + naturel)
+  let intensityVal = null;
+  const intensityMatch = lower.match(/(\d+)\s*\/\s*10|(\d+)\s*sur\s*10/);
   if (intensityMatch) {
-    info.intensity = intensityMatch[1] || intensityMatch[2] || intensityMatch[3] || intensityMatch[4] || intensityMatch[1];
+    intensityVal = parseInt(intensityMatch[1] || intensityMatch[2], 10);
+  } else {
+    intensityVal = naturalIntensity(lower);
+  }
+  // Validation : on ne garde que si valide
+  if (intensityVal !== null && isValidIntensity(intensityVal)) {
+    info.intensity = intensityVal;
   }
 
-  // 5. Âge
+  // 6.5 Âge (nombre)
   const ageMatch = lower.match(/(\d+)\s*ans/);
   if (ageMatch) {
-    info.age = ageMatch[1];
-  } else if (!currentSummary.age && !info.intensity) {
-    const justNumber = lower.match(/^\s*(\d+)\s*$/);
-    if (justNumber) {
-      info.age = justNumber[1];
+    const ageVal = parseInt(ageMatch[1], 10);
+    if (isValidAge(ageVal)) {
+      info.age = ageVal;
     }
   }
 
-  // 6. Sexe
-  if (lower.includes('homme') || lower.includes('monsieur') || lower.includes('garçon')) {
-    info.gender = 'homme';
-  } else if (lower.includes('femme') || lower.includes('madame') || lower.includes('fille')) {
-    info.gender = 'femme';
+  // 6.6 Adresse (regex améliorée)
+  const addressPattern = /(\d{1,5})\s+(\w+)\s+(\w+)\s+(\d{5})/i;
+  const addressMatch = lower.match(addressPattern);
+  if (addressMatch) {
+    info.patientLocation = addressMatch[0];
+  } else if (!summary.patientLocation) {
+    if (lower.includes("rue") || lower.includes("quartier") ||
+        lower.includes("oujda") || lower.includes("casablanca")) {
+      info.patientLocation = message;
+    }
   }
 
   return info;
 };
 
-const generateReply = (currentSummary, newInfo, intent) => {
-  // 1. Priorité aux intents urgents
-  if (intent === 'douleur_poitrine') {
-    return "Une douleur à la poitrine peut être grave. Ne bougez pas, nous envoyons une ambulance. Pouvez-vous me dire si vous avez des antécédents cardiaques ?";
-  }
-  if (intent === 'difficulte_respiratoire') {
-    return "Avez-vous des antécédents respiratoires (asthme, BPCO) ? Essayez de rester assis et de respirer calmement.";
-  }
-  if (intent === 'accident') {
-    return "Où avez-vous mal ? Y a-t-il une blessure visible ?";
-  }
-
-  // 2. Sinon, suivre la logique de collecte d'informations
-  if (!currentSummary.symptom && !newInfo.symptom) {
-    return "Quel est le problème ? Avez-vous une douleur, une gêne respiratoire, ou autre chose ?";
-  }
-  if (!currentSummary.location && !newInfo.location) {
-    return "Où avez-vous mal ou ressentez-vous une gêne ?";
-  }
-  if (!currentSummary.duration && !newInfo.duration) {
-    return "Depuis combien de temps cela dure-t-il ?";
-  }
-  if (!currentSummary.intensity && !newInfo.intensity) {
-    return "Sur une échelle de 1 à 10, quelle est l'intensité ?";
-  }
-  if (!currentSummary.age && !newInfo.age) {
-    return "Quel est votre âge ?";
-  }
-
-  // 3. Réponse générique si tout est collecté
-  return "Merci, je note ces informations. Pouvez-vous me donner plus de détails ?";
+// --- 7. Calcul sévérité (inchangé) ---
+const evaluateSeverity = (summary) => {
+  if (summary.symptom === "cardiaque") return "élevée";
+  const intensity = Number(summary.intensity);
+  if (intensity >= 8) return "élevée";
+  if (intensity >= 5) return "moyenne";
+  return "faible";
 };
 
+// --- 8. Génération réponse (inchangé) ---
+const generateReply = (summary) => {
+  if (!summary.symptom)
+    return { text: "Quel est le problème principal ?", field: "symptom" };
+  if (!summary.bodyPart)
+    return { text: "Quelle partie du corps est concernée ?", field: "bodyPart" };
+  if (!summary.duration)
+    return { text: "Depuis combien de temps ?", field: "duration" };
+  if (summary.intensity === undefined || summary.intensity === null)
+    return { text: "Sur une échelle de 1 à 10, quelle est l'intensité ?", field: "intensity" };
+  if (!summary.age)
+    return { text: "Quel âge a le patient ?", field: "age" };
+  if (!summary.patientLocation)
+    return { text: "Où se trouve le patient ?", field: "patientLocation" };
+  return { text: "Merci. Toutes les informations sont enregistrées.", field: null };
+};
+
+// --- 9. Processus principal ---
 const processMessage = (userMessage, currentSummary = {}) => {
   const extractedInfo = extractInfo(userMessage, currentSummary);
+  const updatedSummary = { ...currentSummary, ...extractedInfo };
   const intent = detectIntent(userMessage);
-  const reply = generateReply(currentSummary, extractedInfo, intent);
-  return { reply, extractedInfo, intent };
+  const severity = evaluateSeverity(updatedSummary);
+  const replyData = generateReply(updatedSummary);
+
+  return {
+    reply: replyData.text,
+    intent,
+    extractedInfo: {
+      ...extractedInfo,
+      severity,
+      lastQuestion: replyData.field,
+    },
+  };
 };
 
-module.exports = { processMessage };
+module.exports = {
+  processMessage,
+  extractInfo,
+  evaluateSeverity,
+};
