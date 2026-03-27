@@ -112,9 +112,14 @@ const extractInfo = (message, summary) => {
   else if (lower.includes("depuis trois heures")) durationStr = "3 heures";
   else {
     const durationMatch = lower.match(/(\d+)\s*(minute|minutes|heure|heures|jour|jours|h|min|j)/);
-    if (durationMatch) {
-      durationStr = durationMatch[1] + " " + durationMatch[2];
-    }
+if (durationMatch) {
+  let unit = durationMatch[2];
+  const number = parseInt(durationMatch[1], 10);
+  if (unit === 'jour' && number > 1) unit = 'jours';
+  if (unit === 'minute' && number > 1) unit = 'minutes';
+  if (unit === 'heure' && number > 1) unit = 'heures';
+  info.duration = number + " " + unit;
+}
   }
   if (durationStr) info.duration = durationStr;
 
@@ -204,4 +209,5 @@ module.exports = {
   processMessage,
   extractInfo,
   evaluateSeverity,
+  generateReply
 };
