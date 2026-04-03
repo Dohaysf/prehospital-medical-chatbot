@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 
 const ESOSummary = ({ summary }) => {
-  // On normalise les champs (certains peuvent venir avec des noms différents)
+  // Normalisation des champs
   const normalized = {
     symptom: summary.symptom,
     bodyPart: summary.bodyPart,
@@ -21,7 +21,15 @@ const ESOSummary = ({ summary }) => {
     severity: summary.severity,
   };
 
-  // Champs à afficher dans l'ordre
+  // Conversion pour compatibilité avec anciennes données
+  const formatSeverity = (severity) => {
+    if (!severity) return 'Non évalué';
+    if (severity === 'élevée') return 'Critique';
+    if (severity === 'moyenne') return 'Moyenne';
+    if (severity === 'faible') return 'Faible';
+    return severity;
+  };
+
   const fields = [
     { key: "symptom", label: "Symptôme", icon: <FaUser /> },
     { key: "bodyPart", label: "Partie du corps", icon: <FaMapMarkerAlt /> },
@@ -54,7 +62,8 @@ const ESOSummary = ({ summary }) => {
         ) : (
           <ul className="eso-list">
             {fields.map(({ key, label, icon }) => {
-              const value = normalized[key];
+              let value = normalized[key];
+              if (key === 'severity') value = formatSeverity(value);
               if (!value) return null;
               return (
                 <li key={key} className="eso-item">

@@ -2,15 +2,14 @@ const express = require('express');
 const router = express.Router();
 const Conversation = require('../models/Conversation');
 
-// GET /api/eso/:sessionId - récupère le résumé actuel depuis MongoDB
-router.get('/:sessionId', async (req, res) => {
+// ========== ROUTES SPÉCIFIQUES (doivent être avant la route dynamique) ==========
+
+// GET /api/eso/sessions - liste toutes les sessions (pour historique et stats)
+router.get('/sessions', async (req, res) => {
   try {
-    const { sessionId } = req.params;
-    const conversation = await Conversation.findOne({ sessionId });
-    if (!conversation) {
-      return res.status(404).json({ error: 'Session non trouvée' });
-    }
-    res.json({ esoSummary: conversation.esoSummary });
+    const sessions = await Conversation.find({}, 'sessionId esoSummary createdAt')
+      .sort({ createdAt: -1 });
+    res.json(sessions);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -41,7 +40,28 @@ router.post('/generate', async (req, res) => {
     if (!conversation) {
       return res.status(404).json({ error: 'Session non trouvée' });
     }
-    // Vous pourriez ici recalculer le résumé à partir des messages si besoin
+    res.json({ esoSummary: conversation.esoSummary });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+// DELETE /api/eso/clear - supprime toutes les conversations
+router.delete('/clear', async (req, res) => {
+  try {
+    await Conversation.deleteMany({});
+    res.json({ message: 'Historique effacé avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+// GET /api/eso/:sessionId - récupère le résumé actuel depuis MongoDB
+router.get('/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const conversation = await Conversation.findOne({ sessionId });
+    if (!conversation) {
+      return res.status(404).json({ error: 'Session non trouvée' });
+    }
     res.json({ esoSummary: conversation.esoSummary });
   } catch (error) {
     res.status(500).json({ error: error.message });

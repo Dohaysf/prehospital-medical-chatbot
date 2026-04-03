@@ -14,13 +14,13 @@ class ESOBuilder {
 
   calculateSeverity() {
     const s = this.data;
-    if (s.symptom === 'douleur' && s.location === 'poitrine') return 'haute';
-    if (s.symptom === 'dyspnée') return 'haute';
-    if (s.symptom === 'saignement') return 'haute';
-    if (s.symptom === 'perte_connaissance') return 'haute';
-    if (s.intensity && parseInt(s.intensity) >= 7) return 'haute';
+    if (s.symptom === 'douleur' && s.location === 'poitrine') return 'critique';
+    if (s.symptom === 'dyspnée') return 'critique';
+    if (s.symptom === 'saignement') return 'critique';
+    if (s.symptom === 'perte_connaissance') return 'critique';
+    if (s.intensity && parseInt(s.intensity) >= 7) return 'critique';
     if (s.intensity && parseInt(s.intensity) >= 4) return 'moyenne';
-    if (s.symptom) return 'basse';
+    if (s.symptom) return 'faible';
     return 'inconnue';
   }
 

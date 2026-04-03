@@ -1,0 +1,126 @@
+/* ChatPage.css - Version harmonisée avec le nouveau style */
+
+.chat-page {
+  display: flex;
+  gap: 28px;
+  min-height: calc(100vh - 140px);
+}
+
+/* Colonne principale de chat */
+.chat-main {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+/* En-tête de la conversation */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 6px;
+}
+
+.chat-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2EC5C0, #7B61FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+}
+
+.new-chat-btn {
+  background: linear-gradient(135deg, #2EC5C0, #7B61FF);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.new-chat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(46,197,192,0.25);
+  background: linear-gradient(135deg, #3dd5d0, #9a88ff);
+}
+
+/* Conteneur principal du chat */
+.chat-container {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 28px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: box-shadow 0.2s;
+}
+
+.chat-container:hover {
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Zone des messages */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 24px;
+  background: rgba(250, 252, 255, 0.7);
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar personnalisée */
+.messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages::-webkit-scrollbar-track {
+  background: #eef2f7;
+  border-radius: 10px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: #b9c4d1;
+  border-radius: 10px;
+}
+
+.messages::-webkit-scrollbar-thumb:hover {
+  background: #8f9eae;
+}
+
+/* Barre latérale (résumé ESO) */
+.chat-sidebar {
+  flex: 1;
+  max-width: 360px;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .chat-page {
+    flex-direction: column;
+  }
+  .chat-sidebar {
+    max-width: 100%;
+    position: static;
+  }
+  .chat-header h2 {
+    font-size: 1.3rem;
+  }
+}

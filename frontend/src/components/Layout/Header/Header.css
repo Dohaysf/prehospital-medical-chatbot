@@ -1,0 +1,34 @@
+/* Header.css */
+.app-header {
+  background: white;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  margin-bottom: 24px;
+  border: 1px solid rgba(123, 97, 255, 0.1);
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2EC5C0, #7B61FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.2px;
+}
+
+.header-user span {
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: transform 0.1s;
+  color: #7B61FF;
+}
+
+.header-user span:hover {
+  transform: scale(1.05);
+}
