@@ -37,7 +37,6 @@ const StatisticsPage = () => {
   const avgIntensity = sessions.reduce((acc, s) => acc + (s.esoSummary?.intensity || 0), 0) / (total || 1);
   const uniqueDays = new Set(sessions.map(s => new Date(s.createdAt).toDateString())).size;
 
-  // Sévérité avec couleurs harmonisées
   const severityCount = { Critique: 0, Moyenne: 0, Faible: 0 };
   sessions.forEach(s => {
     let sev = s.esoSummary?.severity;
@@ -53,7 +52,6 @@ const StatisticsPage = () => {
     datasets: [{ data: Object.values(severityCount), backgroundColor: ['#7B61FF', '#2EC5C0', '#FFD166'], borderWidth: 0 }]
   };
 
-  // Évolution quotidienne
   const dailyMap = {};
   sessions.forEach(s => {
     const date = new Date(s.createdAt).toLocaleDateString();
@@ -66,7 +64,6 @@ const StatisticsPage = () => {
     datasets: [{ label: 'Consultations', data: dailyDataValues, borderColor: '#2EC5C0', backgroundColor: 'rgba(46,197,192,0.1)', fill: true, tension: 0.3 }]
   };
 
-  // Top symptômes (barres violettes)
   const symptomCount = {};
   sessions.forEach(s => {
     const sym = s.esoSummary?.symptom;
@@ -78,7 +75,6 @@ const StatisticsPage = () => {
     datasets: [{ label: 'Nombre de cas', data: topSymptoms.map(item => item[1]), backgroundColor: '#7B61FF', borderRadius: 8 }]
   };
 
-  // Zones anatomiques (barres turquoise)
   const bodyPartCount = {};
   sessions.forEach(s => {
     const bp = s.esoSummary?.bodyPart;
@@ -126,8 +122,9 @@ const StatisticsPage = () => {
         </div>
       </div>
 
+      {/* Première ligne : évolution + camembert */}
       <div className="stats-grid">
-        <div className="stats-card wide">
+        <div className="stats-card">
           <h3><FaChartLine /> Évolution des consultations</h3>
           <Line data={evolutionData} options={lineOptions} />
         </div>
@@ -137,6 +134,7 @@ const StatisticsPage = () => {
         </div>
       </div>
 
+      {/* Deuxième ligne : symptômes + zones anatomiques */}
       <div className="stats-grid">
         <div className="stats-card">
           <h3><FaComments /> Symptômes les plus fréquents</h3>

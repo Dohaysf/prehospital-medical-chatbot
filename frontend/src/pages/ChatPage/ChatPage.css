@@ -1,4 +1,4 @@
-/* ChatPage.css - Version harmonisée avec le nouveau style */
+/* ChatPage.css - Version finale avec localisation */
 
 .chat-page {
   display: flex;
@@ -109,6 +109,92 @@
   position: sticky;
   top: 20px;
   align-self: flex-start;
+}
+
+/* ===== LOCALISATION ===== */
+.input-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: white;
+  border-top: 1px solid #EDF2F7;
+}
+
+.input-area .input-form {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.location-button {
+  background: #F1F5F9;
+  border: none;
+  font-size: 1.3rem;
+  padding: 12px 18px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.location-button:hover:not(:disabled) {
+  background: #E2E8F0;
+  transform: scale(1.02);
+}
+
+.location-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.location-prompt {
+  text-align: center;
+  margin: 8px 16px;
+  padding: 10px;
+  background: rgba(46, 197, 192, 0.1);
+  border-radius: 40px;
+  font-size: 0.85rem;
+  color: #2EC5C0;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.location-prompt p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.location-error {
+  font-size: 0.75rem;
+  color: #EF4444;
+  margin: 4px 16px 8px;
+  text-align: center;
+}
+
+.location-error button {
+  background: none;
+  border: none;
+  color: #0A5C9E;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 0.75rem;
+}
+
+.location-error button:hover {
+  color: #084B82;
 }
 
 /* Responsive */

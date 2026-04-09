@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import useSpeechRecognition from '../../hooks/useSpeechRecognition';
 import './Input.css';
 
-const Input = ({ onSend, disabled }) => {
-  const [text, setText] = useState('');
+const Input = ({ onSend, disabled, value: externalValue, onChange: externalOnChange }) => {
+  const [internalText, setInternalText] = useState('');
   const { transcript, listening, startListening, stopListening } = useSpeechRecognition();
 
-  // Lorsqu'un transcript est reçu, remplir le champ
+  const text = externalValue !== undefined ? externalValue : internalText;
+  const setText = externalOnChange || setInternalText;
+
   useEffect(() => {
-    if (transcript) {
-      setText(transcript);
-    }
-  }, [transcript]);
+    if (transcript) setText(transcript);
+  }, [transcript, setText]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,7 +34,7 @@ const Input = ({ onSend, disabled }) => {
         type="button"
         onClick={listening ? stopListening : startListening}
         disabled={disabled}
-        className="microphone-button"
+        className={`microphone-button ${listening ? 'listening' : ''}`}
         title={listening ? "Arrêter l'écoute" : "Parler"}
       >
         🎤

@@ -6,7 +6,6 @@
   overflow: hidden;
 }
 
-/* Background glow effect (comme dans settings) */
 .stats-page::before {
   content: "";
   position: absolute;
@@ -67,10 +66,9 @@
   background: rgba(255, 255, 255, 0.8);
 }
 
-/* Icônes avec couleur unie (visible) */
 .kpi-icon {
   font-size: 2.8rem;
-  color: #7B61FF; /* violet doux */
+  color: #7B61FF;
   background: rgba(123, 97, 255, 0.1);
   padding: 12px;
   border-radius: 20px;
@@ -94,9 +92,10 @@
   letter-spacing: 0.3px;
 }
 
+/* ===== GRAPHIQUES : deux colonnes égales ===== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: 1fr 1fr;  /* deux colonnes égales */
   gap: 28px;
   margin-bottom: 28px;
   position: relative;
@@ -111,6 +110,8 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.3);
   transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
 }
 
 .stats-card:hover {
@@ -118,10 +119,7 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
 }
 
-.stats-card.wide {
-  grid-column: span 2;
-}
-
+/* Plus besoin de wide, on garde toutes les cartes dans les colonnes */
 .stats-card h3 {
   font-size: 1.2rem;
   font-weight: 600;
@@ -132,12 +130,27 @@
   gap: 8px;
 }
 
+/* Conteneur pour limiter la hauteur des graphiques */
+.stats-card .chart-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  max-height: 320px;
+}
+
+/* Ajustement des canvas pour qu'ils ne soient pas trop grands */
+canvas {
+  max-height: 280px !important;
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* Responsive : sur petits écrans, une seule colonne */
 @media (max-width: 900px) {
   .stats-grid {
     grid-template-columns: 1fr;
-  }
-  .stats-card.wide {
-    grid-column: span 1;
   }
 }
 
@@ -151,7 +164,7 @@
   }
 }
 
-/* Dark mode – adaptation cohérente */
+/* Dark mode */
 body.dark-theme .stats-page {
   background: linear-gradient(135deg, #0f172a, #1e293b);
 }

@@ -1,3 +1,4 @@
+// frontend/src/hooks/useSpeechSynthesis.js
 import { useState, useEffect } from 'react';
 
 const useSpeechSynthesis = () => {
@@ -5,20 +6,20 @@ const useSpeechSynthesis = () => {
   const [supported, setSupported] = useState(false);
 
   useEffect(() => {
-    if ('speechSynthesis' in window) {
-      setSupported(true);
-    } else {
-      console.warn('SpeechSynthesis non supporté');
-    }
+    setSupported('speechSynthesis' in window);
   }, []);
 
+  const detectLanguage = (text) => {
+    const arabicPattern = /[\u0600-\u06FF]/;
+    return arabicPattern.test(text) ? 'ar' : 'fr';
+  };
+
   const speak = (text) => {
-    // Vérifier si la voix est activée dans les paramètres
     const voiceEnabled = localStorage.getItem('voiceEnabled') !== 'false';
     if (!supported || !voiceEnabled) return;
-    
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fr-FR';
+    const lang = detectLanguage(text);
+    utterance.lang = lang === 'ar' ? 'ar-EG' : 'fr-FR';
     utterance.onstart = () => setSpeaking(true);
     utterance.onend = () => setSpeaking(false);
     utterance.onerror = () => setSpeaking(false);

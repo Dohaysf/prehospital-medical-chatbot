@@ -1,3 +1,4 @@
+// frontend/src/hooks/useSpeechRecognition.js
 import { useState, useEffect, useRef } from 'react';
 
 const useSpeechRecognition = () => {
@@ -5,15 +6,19 @@ const useSpeechRecognition = () => {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
 
+  const getLanguage = () => {
+    const lang = localStorage.getItem('language') || 'fr';
+    return lang === 'ar' ? 'ar' : 'fr-FR'; // 'ar' pour l'arabe standard
+  };
+
   useEffect(() => {
-    // Vérifier la compatibilité
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       console.warn('SpeechRecognition non supporté');
       return;
     }
     const recognition = new SpeechRecognition();
-    recognition.lang = 'fr-FR';
+    recognition.lang = getLanguage();
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -43,6 +48,7 @@ const useSpeechRecognition = () => {
 
   const startListening = () => {
     if (recognitionRef.current) {
+      recognitionRef.current.lang = getLanguage();
       setTranscript('');
       setListening(true);
       recognitionRef.current.start();
