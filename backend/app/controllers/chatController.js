@@ -2,7 +2,6 @@ const { processMessage } = require('../services/nlpService');
 const ESOBuilder = require('../utils/esoBuilder');
 const Conversation = require('../models/Conversation');
 
-// Tentative d'import de processMessageGroq (si présent)
 let processMessageGroq = null;
 try {
   processMessageGroq = require('../services/processMessageGroq').processMessageGroq;
@@ -16,27 +15,27 @@ const sessions = new Map();
 const handleChat = async (req, res) => {
   try {
     const { message, sessionId } = req.body;
+    // Récupérer l'utilisateur authentifié (mis par le middleware auth)
+    const userId = req.user.userId;
 
     if (!message || typeof message !== 'string' || message.trim() === '') {
       return res.status(400).json({ error: 'Message invalide' });
     }
 
     const id = sessionId || Date.now().toString();
-    console.log('🔑 Session ID:', id);
+    console.log('🔑 Session ID:', id, 'pour utilisateur:', userId);
 
     if (!sessions.has(id)) {
       sessions.set(id, new ESOBuilder());
     }
     const builder = sessions.get(id);
 
-    // Déterminer le service à utiliser
     const useGroq = process.env.USE_GROQ === 'true' && processMessageGroq !== null;
     console.log('🔍 USE_GROQ =', useGroq);
 
     let result;
     if (useGroq) {
       console.log('🤖 Appel à processMessageGroq');
-      // On passe le sessionId pour que Groq puisse déclencher l'envoi PFA
       result = await processMessageGroq(message, builder.getSummary(), id);
     } else {
       console.log('📞 Appel à processMessage (ancien système)');
@@ -49,11 +48,11 @@ const handleChat = async (req, res) => {
     const summary = builder.getSummary();
     console.log('📊 Résumé mis à jour:', summary);
 
-    // Sauvegarde MongoDB
+    // Sauvegarde MongoDB : on filtre par userId ET sessionId
     console.log('⏳ Tentative de sauvegarde MongoDB...');
     try {
       const dbResult = await Conversation.findOneAndUpdate(
-        { sessionId: id },
+        { sessionId: id, userId: userId },  // ← ajout du filtre userId
         {
           $push: {
             messages: {
@@ -65,7 +64,8 @@ const handleChat = async (req, res) => {
           },
           $set: {
             esoSummary: summary,
-            intent: intent
+            intent: intent,
+            userId: userId  // ← on s'assure que userId est présent (pour l'upsert)
           }
         },
         { upsert: true, new: true }

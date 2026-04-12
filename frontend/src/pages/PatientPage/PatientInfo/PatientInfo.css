@@ -1,0 +1,61 @@
+.patient-info {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.patient-info h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, #2EC5C0, #7B61FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.info-card {
+  background: white;
+  border-radius: 28px;
+  padding: 28px 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.info-card p {
+  margin: 16px 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.info-card strong {
+  width: 180px;
+  font-weight: 600;
+  color: #2c3e66;
+}
+
+.info-card p span:last-child {
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .info-card strong {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+}/* Thème sombre pour PatientInfo */
+body.dark-theme .patient-info h1 {
+  color: #e0e0e0;
+}
+body.dark-theme .info-card {
+  background: #1e2a3a;
+  color: #e0e0e0;
+  border: 1px solid #2a3a4a;
+}
+body.dark-theme .info-card p {
+  color: #cbd5e1;
+}

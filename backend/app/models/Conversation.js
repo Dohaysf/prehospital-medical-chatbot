@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 
 const conversationSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
   sessionId: {
     type: String,
     required: true,
-    unique: true,
     index: true
   },
   messages: [
@@ -38,7 +43,7 @@ const conversationSchema = new mongoose.Schema({
   }
 });
 
-// Index pour faciliter les recherches par date
-conversationSchema.index({ createdAt: -1 });
+// Index composé pour récupérer rapidement les conversations d'un utilisateur triées par date
+conversationSchema.index({ userId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Conversation', conversationSchema);
