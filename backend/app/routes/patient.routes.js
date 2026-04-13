@@ -6,8 +6,10 @@ const router = express.Router();
 // Récupérer toutes les conversations du patient connecté
 router.get('/conversations', auth, async (req, res) => {
   try {
-    const conversations = await Conversation.find({ userId: req.user.userId })
-      .sort({ createdAt: -1 });
+    const conversations = await Conversation.find(
+  { userId: req.user.userId },
+  '-__v'
+).sort({ createdAt: -1 });
     res.json(conversations);
   } catch (error) {
     res.status(500).json({ error: error.message });

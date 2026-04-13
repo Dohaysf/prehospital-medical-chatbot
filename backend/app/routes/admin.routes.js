@@ -5,7 +5,9 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 const isManager = (req, res, next) => {
-  if (req.user.role !== 'manager') return res.status(403).json({ error: 'Accès refusé' });
+  if (!req.user || req.user.role !== 'manager') {
+    return res.status(403).json({ error: 'Accès refusé (manager uniquement)' });
+  }
   next();
 };
 

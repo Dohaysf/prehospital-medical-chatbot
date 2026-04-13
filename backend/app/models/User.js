@@ -1,3 +1,4 @@
+// backend/app/models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -6,9 +7,19 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: { type: String, required: true },
   role: { type: String, enum: ['patient', 'manager'], default: 'patient' },
+  age: { type: Number },
+  gender: { type: String, enum: ['homme', 'femme'] },
+  phone: { type: String },
+  medicalHistory: {
+    diabete: { type: Boolean, default: false },
+    asthme: { type: Boolean, default: false },
+    tension: { type: Boolean, default: false },
+    other: { type: String, default: '' }
+  },
   createdAt: { type: Date, default: Date.now }
 });
 
+// ... (hash password et comparePassword)
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);

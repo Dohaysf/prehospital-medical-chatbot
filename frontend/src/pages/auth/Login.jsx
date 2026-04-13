@@ -1,51 +1,87 @@
-// frontend/src/pages/auth/Login.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Auth.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (location.state?.message) {
-      setMessage(location.state.message);
-    }
-  }, [location]);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // 🔒 validation simple
+    if (!email.includes('@')) return setError('Email invalide');
+    if (password.length < 6) return setError('Mot de passe trop court');
+
+    setLoading(true);
+
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password
+      });
+
+      // 💾 stockage sécurisé
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userRole', res.data.user.role);
+
+      console.log("LOGIN OK:", res.data);
+
+      // 🚀 REDIRECTION CORRECTE SELON TES ROUTES
       if (res.data.user.role === 'manager') {
         navigate('/manager/dashboard');
       } else {
-        navigate('/patient/info');   // ← ici
+        navigate('/patient/chat');   // ✅ IMPORTANT (corrigé)
       }
+
     } catch (err) {
+      console.log(err);
       setError(err.response?.data?.error || 'Erreur de connexion');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
-      <h2>Connexion</h2>
-      {message && <div className="success">{message}</div>}
-      {error && <div className="error">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} required />
-        <button type="submit">Se connecter</button>
-      </form>
-      <p>Pas de compte ? <a href="/register">S'inscrire</a></p>
+    <div className="auth-wrapper">
+      <div className="auth-container">
+
+        <h2>Connexion</h2>
+        <p className="subtitle">Accédez à votre espace médical</p>
+
+        {error && <div className="error">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+          />
+
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+
+          <button type="submit" disabled={loading}>
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+        </form>
+
+        <p className="link">
+          Pas de compte ? <a href="/register">S'inscrire</a>
+        </p>
+
+      </div>
     </div>
   );
 };

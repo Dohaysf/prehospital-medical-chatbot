@@ -1,3 +1,4 @@
+// frontend/src/pages/PatientPage/PatientInfo/PatientInfo.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './PatientInfo.css';
@@ -19,16 +20,32 @@ const PatientInfo = () => {
     });
   }, []);
 
-  if (loading) return <div>Chargement...</div>;
+  if (loading) return <div className="patient-info-loading">Chargement...</div>;
 
   return (
     <div className="patient-info">
       <h1>Mes informations personnelles</h1>
       <div className="info-card">
-        <p><strong>Nom :</strong> {user.name}</p>
-        <p><strong>Email :</strong> {user.email}</p>
-        <p><strong>Rôle :</strong> {user.role === 'patient' ? 'Patient' : 'Manager'}</p>
-        <p><strong>Date d'inscription :</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
+        <div className="info-row"><strong>Nom complet :</strong> {user.name}</div>
+        <div className="info-row"><strong>Email :</strong> {user.email}</div>
+        <div className="info-row"><strong>Âge :</strong> {user.age || 'Non renseigné'}</div>
+        <div className="info-row"><strong>Sexe :</strong> {user.gender === 'homme' ? 'Homme' : user.gender === 'femme' ? 'Femme' : 'Non renseigné'}</div>
+        <div className="info-row"><strong>Téléphone :</strong> {user.phone || 'Non renseigné'}</div>
+        <div className="info-row"><strong>Rôle :</strong> {user.role === 'patient' ? 'Patient' : 'Manager'}</div>
+        <div className="info-row"><strong>Date d'inscription :</strong> {new Date(user.createdAt).toLocaleDateString()}</div>
+
+        {user.medicalHistory && (
+          <div className="medical-history">
+            <h3>Antécédents médicaux</h3>
+            <ul>
+              {user.medicalHistory.diabete && <li>Diabète</li>}
+              {user.medicalHistory.asthme && <li>Asthme</li>}
+              {user.medicalHistory.tension && <li>Hypertension</li>}
+              {user.medicalHistory.other && <li>Autre : {user.medicalHistory.other}</li>}
+              {!user.medicalHistory.diabete && !user.medicalHistory.asthme && !user.medicalHistory.tension && !user.medicalHistory.other && <li>Aucun antécédent déclaré</li>}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
