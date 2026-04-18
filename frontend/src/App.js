@@ -1,30 +1,40 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
-import ChatPage from './pages/ChatPage/ChatPage';
-import HistoryPage from './pages/HistoryPage/HistoryPage';
-import StatisticsPage from './pages/StatisticsPage/StatisticsPage';
-import SettingsPage from './pages/SettingsPage/SettingsPage';
+import ChatPage from './pages/AdminPge/ChatPage/ChatPage';
+import HistoryPage from './pages/AdminPge/HistoryPage/HistoryPage';
+import StatisticsPage from './pages/AdminPge/StatisticsPage/StatisticsPage';
+import SettingsPage from './pages/AdminPge/SettingsPage/SettingsPage';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import PatientLayout from './components/LayoutPatient/PatientLayout/PatientLayout'; 
+import PatientLayout from './components/LayoutPatient/PatientLayout/PatientLayout';
 import PatientInfo from './pages/PatientPage/PatientInfo/PatientInfo';
 import PatientHistory from './pages/PatientPage/PatientHistory/PatientHistory';
 import PatientESO from './pages/PatientPage/PatientESO/PatientESO';
-import PatientChat from './pages/PatientPage/PatientChat/PatientChat'; // Ajout
-import PrivateRoute from './components/PrivateRoute';
-import './App.css';
+import PatientChat from './pages/PatientPage/PatientChat/PatientChat';
 import PatientSettings from './pages/PatientPage/PatientSettings/PatientSettings';
+import PrivateRoute from './components/PrivateRoute';
+import PublicHomePage from './pages/PublicPage/PublicHomePage/PublicHomePage';
+import PublicChatPage from './pages/PublicPage/PublicChatPage/PublicChatPage';
+import PublicAboutPage from './pages/PublicPage/PublicAboutPage/PublicAboutPage';
+import ContactPage from './pages/AdminPge/ContactPage/ContactPage';
+import './App.css';
 
 function App() {
   const role = localStorage.getItem('userRole');
+  const isAuthenticated = !!localStorage.getItem('token');
 
   return (
     <BrowserRouter>
       <Routes>
+        {/* Routes publiques */}
+        <Route path="/" element={<PublicHomePage />} />
+        <Route path="/public/home" element={<PublicHomePage />} />
+        <Route path="/public/chat" element={<PublicChatPage />} />
+        <Route path="/public/about" element={<PublicAboutPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Patient routes */}
+        {/* Routes patient protégées */}
         <Route path="/patient/chat" element={
           <PrivateRoute allowedRoles={['patient']}>
             <PatientLayout><PatientChat /></PatientLayout>
@@ -46,12 +56,12 @@ function App() {
           </PrivateRoute>
         } />
         <Route path="/patient/settings" element={
-           <PrivateRoute allowedRoles={['patient']}>
-           <PatientLayout><PatientSettings /></PatientLayout>
-        </PrivateRoute>
+          <PrivateRoute allowedRoles={['patient']}>
+            <PatientLayout><PatientSettings /></PatientLayout>
+          </PrivateRoute>
         } />
 
-        {/* Manager routes */}
+        {/* Routes manager protégées */}
         <Route path="/manager/dashboard" element={
           <PrivateRoute allowedRoles={['manager']}>
             <Layout><StatisticsPage /></Layout>
@@ -72,9 +82,15 @@ function App() {
             <Layout><SettingsPage /></Layout>
           </PrivateRoute>
         } />
+   
+        <Route path="/manager/contacts" element={
+          <PrivateRoute allowedRoles={['manager']}>
+            <Layout><ContactPage /></Layout>
+          </PrivateRoute>
+        } />
 
         {/* Redirection par défaut */}
-        <Route path="/" element={<Navigate to={role === 'manager' ? '/manager/dashboard' : '/patient/chat'} />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );

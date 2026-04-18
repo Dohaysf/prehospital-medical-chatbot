@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { FaComments, FaHistory, FaChartBar, FaCog, FaHospitalUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaComments, FaHistory, FaChartBar, FaCog, FaHospitalUser, FaSignOutAlt, FaEnvelope } from 'react-icons/fa'; // ← ajout de FaEnvelope
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -27,6 +27,11 @@ const Sidebar = () => {
         <NavLink to="/manager/dashboard" className={({ isActive }) => (isActive ? 'active' : '')}>
           <FaChartBar className="nav-icon" />
           <span>Statistiques</span>
+        </NavLink>
+        {/* NOUVEAU LIEN VERS LA PAGE CONTACTS */}
+        <NavLink to="/manager/contacts" className={({ isActive }) => (isActive ? 'active' : '')}>
+          <FaEnvelope className="nav-icon" />
+          <span>Messages reçus</span>
         </NavLink>
         <NavLink to="/manager/settings" className={({ isActive }) => (isActive ? 'active' : '')}>
           <FaCog className="nav-icon" />

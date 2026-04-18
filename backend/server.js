@@ -4,7 +4,10 @@ require('dotenv').config();
 const connectDB = require('./app/config/db');
 const chatRoutes = require('./app/routes/chat');
 const esoRoutes = require('./app/routes/eso');
-const authRoutes = require('./app/routes/auth.routes'); // ← Ajout
+const authRoutes = require('./app/routes/auth.routes');
+const patientRoutes = require('./app/routes/patient.routes');
+const publicRoutes = require('./app/routes/public.routes');
+const adminRoutes = require('./app/routes/admin.routes'); // ← AJOUT
 
 console.log('📌 Vérification des variables d\'environnement :');
 console.log('📌 GROQ_API_KEY présente ?', process.env.GROQ_API_KEY ? 'Oui' : 'Non');
@@ -21,14 +24,16 @@ app.use(express.json());
 // Routes
 app.use('/api/chat', chatRoutes);
 app.use('/api/eso', esoRoutes);
-app.use('/api/auth', authRoutes); 
-const patientRoutes = require('./app/routes/patient.routes');
+app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/admin', adminRoutes); // ← MONTAGE DES ROUTES ADMIN
+
 app.get('/', (req, res) => {
   res.send('API du chatbot médical en fonctionnement');
 });
 
-// Connexion MongoDB puis démarrage du serveur uniquement si on exécute directement ce fichier
+// Connexion MongoDB puis démarrage du serveur
 if (require.main === module) {
   connectDB()
     .then(() => {

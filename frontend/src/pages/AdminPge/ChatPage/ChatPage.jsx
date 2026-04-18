@@ -1,30 +1,38 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Message from '../../components/Message/Message';
-import Input from '../../components/Input/Input';
-import ESOSummary from '../../components/ESOSummary/ESOSummary';
-import { sendMessage } from '../../services/api';
-import useSpeechSynthesis from '../../hooks/useSpeechSynthesis';
-import useGeolocation from '../../hooks/useGeolocation';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Message from '../../../components/Message/Message';
+import Input from '../../../components/Input/Input';
+import ESOSummary from '../../../components/ESOSummary/ESOSummary';
+import { sendMessage } from '../../../services/api';
+import useSpeechSynthesis from '../../../hooks/useSpeechSynthesis';
+import useGeolocation from '../../../hooks/useGeolocation';
 import './ChatPage.css';
 
 const ChatPage = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  const isAuthenticated = !!token;
+
   const getCurrentLanguage = () => localStorage.getItem('language') || 'fr';
   const getWelcomeMessage = () => {
     const lang = getCurrentLanguage();
-    return lang === 'ar' 
+    return lang === 'ar'
       ? "مرحبًا، أنا المساعد الطبي. يرجى وصف حالتك."
       : "Bonjour, je suis l'assistant médical. Décrivez votre situation.";
   };
 
   const [messages, setMessages] = useState([{ text: getWelcomeMessage(), sender: 'bot' }]);
-  const [sessionId, setSessionId] = useState(null);
+  const [sessionId, setSessionId] = useState(() => localStorage.getItem('currentSessionId') || null);
   const [loading, setLoading] = useState(false);
   const [esoSummary, setEsoSummary] = useState({});
   const [inputValue, setInputValue] = useState('');
+  const [emergencyDisabled, setEmergencyDisabled] = useState(false);
   const messagesEndRef = useRef(null);
   const { speak } = useSpeechSynthesis();
   const { location, loading: locLoading, error: locError, getLocation, resetError } = useGeolocation();
   const [locationSentInThisConversation, setLocationSentInThisConversation] = useState(false);
+  const [showInvite, setShowInvite] = useState(!isAuthenticated);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -37,9 +45,11 @@ const ChatPage = () => {
   const handleSend = useCallback(async (userMessage) => {
     setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
     setLoading(true);
-
     const data = await sendMessage(userMessage, sessionId);
-    if (data.sessionId) setSessionId(data.sessionId);
+    if (data.sessionId) {
+      setSessionId(data.sessionId);
+      localStorage.setItem('currentSessionId', data.sessionId);
+    }
     setMessages(prev => [...prev, { text: data.reply, sender: 'bot' }]);
     setEsoSummary(data.esoSummary || {});
     setLoading(false);
@@ -65,10 +75,53 @@ const ChatPage = () => {
     setMessages([{ text: getWelcomeMessage(), sender: 'bot' }]);
     setSessionId(null);
     setEsoSummary({});
+    localStorage.removeItem('currentSessionId');
     window.speechSynthesis?.cancel();
     locationSentRef.current = false;
     setLocationSentInThisConversation(false);
     resetError();
+    setEmergencyDisabled(false);
+  };
+
+  const attachConversation = async () => {
+    if (!sessionId) return;
+    try {
+      await axios.post('http://localhost:5000/api/patient/attach-conversation', { sessionId }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Conversation sauvegardée dans votre espace patient !');
+      setShowInvite(false);
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors du rattachement');
+    }
+  };
+
+  // Nouvelle fonction d'urgence manuelle
+  const handleEmergency = async () => {
+    if (!sessionId) {
+      alert("Veuillez d'abord envoyer un message pour démarrer une session.");
+      return;
+    }
+    const confirmSend = window.confirm("⚠️ Confirmez-vous l’envoi d’une alerte d’urgence ? Un SMS sera envoyé à l’équipe médicale.");
+    if (!confirmSend) return;
+
+    setEmergencyDisabled(true);
+    try {
+      const response = await axios.post('http://localhost:5000/api/chat/emergency-manual', {
+        sessionId,
+        summary: esoSummary
+      }, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      alert("Alerte envoyée. Un agent va vous contacter rapidement.");
+      // Ajouter la réponse du bot dans le chat
+      setMessages(prev => [...prev, { text: response.data.reply, sender: 'bot' }]);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l'envoi de l'alerte. Veuillez réessayer.");
+    } finally {
+      // Réactiver après 5 secondes
+      setTimeout(() => setEmergencyDisabled(false), 5000);
+    }
   };
 
   return (
@@ -87,22 +140,29 @@ const ChatPage = () => {
             <div ref={messagesEndRef} />
           </div>
           <div className="input-area">
-            <Input 
-              onSend={handleSend} 
-              disabled={loading} 
+            <Input
+              onSend={handleSend}
+              disabled={loading}
               value={inputValue}
               onChange={setInputValue}
             />
-            <button 
-              className="location-button" 
+            <button
+              className="location-button"
               onClick={handleLocationClick}
               disabled={locLoading}
               title="Me localiser"
             >
               {locLoading ? '⏳' : '📍'}
             </button>
+            <button
+              className="emergency-button"
+              onClick={handleEmergency}
+              disabled={emergencyDisabled}
+              title="Alerte d'urgence immédiate"
+            >
+              🚨
+            </button>
           </div>
-          {/* Message d'invitation à la localisation (affiché tant qu'aucune position n'est partagée) */}
           {!locationSentInThisConversation && !locLoading && (
             <div className="location-prompt">
               <p>📍 Partagez votre position pour une intervention plus rapide (optionnel)</p>
@@ -113,6 +173,18 @@ const ChatPage = () => {
               <p>{locError}</p>
               <button onClick={() => window.location.reload()}>Recharger</button>
             </div>
+          )}
+          {showInvite && (
+            <div className="invite-banner">
+              <p>💾 Sauvegardez cette conversation et accédez à votre historique en vous connectant ou en créant un compte.</p>
+              <button onClick={() => navigate('/login')}>Se connecter</button>
+              <button onClick={() => navigate('/register')}>Créer un compte</button>
+            </div>
+          )}
+          {isAuthenticated && sessionId && (
+            <button className="attach-btn" onClick={attachConversation}>
+              Rattacher cette conversation à mon compte
+            </button>
           )}
         </div>
       </div>

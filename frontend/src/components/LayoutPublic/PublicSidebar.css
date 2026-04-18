@@ -1,0 +1,120 @@
+.public-sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #1a2a4f, #0f1a3a);
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo {
+  padding: 28px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2EC5C0, #7B61FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sidebar-logo p {
+  margin: 5px 0 0;
+  font-size: 0.8rem;
+  color: #a0aec0;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 24px;
+  margin: 0 12px;
+  border-radius: 12px;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.sidebar-nav a:hover {
+  background: rgba(79, 195, 247, 0.15);
+  color: white;
+}
+
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, #0066cc, #004999);
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 102, 204, 0.3);
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+  width: 24px;
+  text-align: center;
+  color: #4fc3f7;
+}
+
+.auth-section {
+  padding: 24px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 40px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+}
+
+.login-btn {
+  background: transparent;
+  border: 1px solid #4fc3f7;
+  color: #4fc3f7;
+}
+
+.login-btn:hover {
+  background: rgba(79, 195, 247, 0.15);
+}
+
+.register-btn {
+  background: linear-gradient(135deg, #2EC5C0, #7B61FF);
+  color: white;
+}
+
+.register-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(46,197,192,0.3);
+}
+
+.dashboard-btn {
+  background: #2c7da0;
+  color: white;
+}

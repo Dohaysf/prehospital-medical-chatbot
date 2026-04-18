@@ -7,10 +7,10 @@ import {
   FaTachometerAlt,
   FaBirthdayCake,
   FaMapPin,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 
 const ESOSummary = ({ summary }) => {
-  // Normalisation des champs
   const normalized = {
     symptom: summary.symptom,
     bodyPart: summary.bodyPart,
@@ -21,14 +21,18 @@ const ESOSummary = ({ summary }) => {
     severity: summary.severity,
   };
 
-  // Conversion pour compatibilité avec anciennes données
   const formatSeverity = (severity) => {
-    if (!severity) return 'Non évalué';
-    if (severity === 'élevée') return 'Critique';
-    if (severity === 'moyenne') return 'Moyenne';
-    if (severity === 'faible') return 'Faible';
-    return severity;
+    if (!severity) return null;
+    const sevMap = {
+      élevée: { label: "Critique", color: "#E53E3E", icon: <FaExclamationTriangle /> },
+      moyenne: { label: "Moyenne", color: "#ED8936", icon: <FaExclamationTriangle /> },
+      faible: { label: "Faible", color: "#38A169", icon: <FaExclamationTriangle /> },
+    };
+    const key = severity.toLowerCase();
+    return sevMap[key] || { label: severity, color: "#718096", icon: null };
   };
+
+  const severityData = formatSeverity(normalized.severity);
 
   const fields = [
     { key: "symptom", label: "Symptôme", icon: <FaUser /> },
@@ -36,8 +40,7 @@ const ESOSummary = ({ summary }) => {
     { key: "duration", label: "Durée", icon: <FaClock /> },
     { key: "intensity", label: "Intensité (/10)", icon: <FaTachometerAlt /> },
     { key: "age", label: "Âge", icon: <FaBirthdayCake /> },
-    { key: "patientLocation", label: "Localisation du patient", icon: <FaMapPin /> },
-    { key: "severity", label: "Niveau d'urgence", icon: null },
+    { key: "patientLocation", label: "Localisation", icon: <FaMapPin /> },
   ];
 
   const hasData = Object.values(normalized).some(
@@ -60,22 +63,30 @@ const ESOSummary = ({ summary }) => {
             Commencez la conversation avec l'assistant.
           </p>
         ) : (
-          <ul className="eso-list">
-            {fields.map(({ key, label, icon }) => {
-              let value = normalized[key];
-              if (key === 'severity') value = formatSeverity(value);
-              if (!value) return null;
-              return (
-                <li key={key} className="eso-item">
-                  <span className="eso-key">
-                    {icon && <span style={{ marginRight: 8 }}>{icon}</span>}
-                    {label}
-                  </span>
-                  <span className="eso-value">{value}</span>
-                </li>
-              );
-            })}
-          </ul>
+          <>
+            {severityData && (
+              <div className="severity-pill" style={{ backgroundColor: severityData.color }}>
+                {severityData.icon && <span className="severity-icon">{severityData.icon}</span>}
+                <span>Urgence {severityData.label}</span>
+              </div>
+            )}
+            <ul className="eso-list">
+              {fields.map(({ key, label, icon }) => {
+                let value = normalized[key];
+                if (!value) return null;
+                if (key === 'intensity' && !isNaN(value)) value = `${value}/10`;
+                return (
+                  <li key={key} className="eso-item">
+                    <span className="eso-key">
+                      {icon && <span className="eso-icon">{icon}</span>}
+                      {label}
+                    </span>
+                    <span className="eso-value">{value}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
         )}
       </div>
     </div>

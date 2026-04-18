@@ -2,28 +2,22 @@ const { processMessage } = require('../services/nlpService');
 const ESOBuilder = require('../utils/esoBuilder');
 const Conversation = require('../models/Conversation');
 
-let processMessageGroq = null;
-try {
-  processMessageGroq = require('../services/processMessageGroq').processMessageGroq;
-  console.log('✅ processMessageGroq importée');
-} catch (e) {
-  console.log('⚠️ processMessageGroq non disponible, utilisation du système par défaut');
-}
-
+const { processMessageGroq } = require('../services/processMessageGroq');
+console.log('✅ processMessageGroq importée');
 const sessions = new Map();
 
 const handleChat = async (req, res) => {
   try {
     const { message, sessionId } = req.body;
-    // Récupérer l'utilisateur authentifié (mis par le middleware auth)
-    const userId = req.user.userId;
+    // Récupération de l'utilisateur connecté (peut être undefined)
+    const userId = req.user?.userId || null;
 
     if (!message || typeof message !== 'string' || message.trim() === '') {
       return res.status(400).json({ error: 'Message invalide' });
     }
 
     const id = sessionId || Date.now().toString();
-    console.log('🔑 Session ID:', id, 'pour utilisateur:', userId);
+    console.log('🔑 Session ID:', id, 'pour utilisateur:', userId || 'anonyme');
 
     if (!sessions.has(id)) {
       sessions.set(id, new ESOBuilder());
@@ -35,10 +29,8 @@ const handleChat = async (req, res) => {
 
     let result;
     if (useGroq) {
-      console.log('🤖 Appel à processMessageGroq');
       result = await processMessageGroq(message, builder.getSummary(), id);
     } else {
-      console.log('📞 Appel à processMessage (ancien système)');
       result = processMessage(message, builder.getSummary());
     }
 
@@ -46,28 +38,33 @@ const handleChat = async (req, res) => {
 
     builder.update(extractedInfo);
     const summary = builder.getSummary();
-    console.log('📊 Résumé mis à jour:', summary);
 
-    // Sauvegarde MongoDB : on filtre par userId ET sessionId
+    // Sauvegarde en base
     console.log('⏳ Tentative de sauvegarde MongoDB...');
     try {
-      const dbResult = await Conversation.findOneAndUpdate(
-        { sessionId: id, userId: userId },  // ← ajout du filtre userId
-        {
-          $push: {
-            messages: {
-              $each: [
-                { sender: 'user', text: message, timestamp: new Date() },
-                { sender: 'bot', text: reply, timestamp: new Date() }
-              ]
-            }
-          },
-          $set: {
-            esoSummary: summary,
-            intent: intent,
-            userId: userId  // ← on s'assure que userId est présent (pour l'upsert)
+      const updateData = {
+        $push: {
+          messages: {
+            $each: [
+              { sender: 'user', text: message, timestamp: new Date() },
+              { sender: 'bot', text: reply, timestamp: new Date() }
+            ]
           }
         },
+        $set: {
+          esoSummary: summary,
+          intent: intent
+        }
+      };
+      if (userId) {
+        updateData.$set.userId = userId;
+      } else {
+        updateData.$set.tempUserId = id;
+      }
+
+      const dbResult = await Conversation.findOneAndUpdate(
+        { sessionId: id },
+        updateData,
         { upsert: true, new: true }
       );
       console.log('✅ Sauvegarde réussie, ID doc:', dbResult._id);

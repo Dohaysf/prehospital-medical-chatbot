@@ -1,0 +1,208 @@
+/* ContactPage.css - Admin messages */
+
+.contact-admin-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.contact-admin-header {
+  margin-bottom: 32px;
+}
+
+.contact-admin-header h1 {
+  font-size: 2rem;
+  color: #1E2F3E;
+  margin-bottom: 8px;
+}
+
+.contact-admin-header p {
+  color: #5C6F87;
+}
+
+.contact-admin-controls {
+  margin-bottom: 24px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 40px;
+  padding: 8px 16px;
+  max-width: 400px;
+}
+
+.search-icon {
+  color: #94A3B8;
+  margin-right: 12px;
+}
+
+.search-bar input {
+  border: none;
+  flex: 1;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.contact-admin-layout {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.messages-list {
+  flex: 1.2;
+  min-width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  padding: 16px;
+}
+
+.message-card {
+  background: #F8FAFE;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.message-card:hover {
+  background: #EFF7FF;
+  transform: translateY(-2px);
+}
+
+.message-card.active {
+  border-color: #0F5C8F;
+  background: #EFF7FF;
+}
+
+.message-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.message-name {
+  font-weight: 600;
+  color: #1E2F3E;
+}
+
+.message-date {
+  color: #5C6F87;
+  font-size: 0.8rem;
+}
+
+.message-email {
+  font-size: 0.85rem;
+  color: #0F5C8F;
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+
+.message-preview {
+  font-size: 0.85rem;
+  color: #5C6F87;
+  margin-bottom: 12px;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #E53E3E;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  background: #FFF5F5;
+  color: #C53030;
+}
+
+/* Détail message */
+.message-detail {
+  flex: 1;
+  min-width: 320px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.message-detail h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #1E2F3E;
+}
+
+.detail-field {
+  margin-bottom: 16px;
+}
+
+.detail-field strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #0F5C8F;
+}
+
+.detail-message {
+  background: #F8FAFE;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 4px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.reply-btn {
+  background: #0F5C8F;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 40px;
+  cursor: pointer;
+  margin-top: 16px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.reply-btn:hover {
+  background: #0A446A;
+}
+
+.no-selection, .no-messages {
+  text-align: center;
+  color: #94A3B8;
+  padding: 40px;
+}
+
+.contact-admin-loading {
+  text-align: center;
+  padding: 60px;
+  font-size: 1.2rem;
+  color: #5C6F87;
+}
+
+@media (max-width: 900px) {
+  .contact-admin-layout {
+    flex-direction: column;
+  }
+  .messages-list {
+    max-height: 400px;
+  }
+}

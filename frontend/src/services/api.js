@@ -1,4 +1,3 @@
-// frontend/src/services/api.js
 import axios from 'axios';
 
 const api = axios.create({
@@ -20,5 +19,16 @@ export const sendMessage = async (message, sessionId) => {
   } catch (error) {
     console.error('Erreur API', error);
     return { reply: "Désolé, l'assistant est indisponible." };
+  }
+};
+
+// UNE SEULE fonction, qui utilise api (l'intercepteur ajoute le token)
+export const attachConversation = async (sessionId) => {
+  try {
+    const response = await api.post('/patient/attach-conversation', { sessionId });
+    return response.data;
+  } catch (error) {
+    console.error('Erreur rattachement', error);
+    throw error;
   }
 };

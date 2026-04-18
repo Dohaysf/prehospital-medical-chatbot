@@ -209,4 +209,76 @@
   .chat-header h2 {
     font-size: 1.3rem;
   }
+}.login-prompt {
+  background: linear-gradient(135deg, #e6f7ff, #b3e0ff);
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #004999;
+}
+.login-prompt a {
+  color: #0066cc;
+  font-weight: bold;
+  text-decoration: none;
+}
+.login-prompt a:hover {
+  text-decoration: underline;
+}.invite-banner {
+  background: linear-gradient(135deg, #e6f0ff, #d9e6ff);
+  border-radius: 20px;
+  padding: 12px 20px;
+  margin: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.invite-banner p {
+  margin: 0;
+  color: #1e2a3a;
+}
+.invite-banner button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+.attach-btn {
+  background: #2c7da0;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 30px;
+  margin: 12px;
+  cursor: pointer;
+}
+.emergency-button {
+  background: #E53E3E;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emergency-button:hover:not(:disabled) {
+  background: #C53030;
+  transform: scale(1.05);
+}
+
+.emergency-button:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
