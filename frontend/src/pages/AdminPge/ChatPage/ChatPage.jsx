@@ -32,7 +32,15 @@ const ChatPage = () => {
   const { speak } = useSpeechSynthesis();
   const { location, loading: locLoading, error: locError, getLocation, resetError } = useGeolocation();
   const [locationSentInThisConversation, setLocationSentInThisConversation] = useState(false);
-  const [showInvite, setShowInvite] = useState(!isAuthenticated);
+
+  // Création automatique d'une session au chargement
+  useEffect(() => {
+    if (!sessionId && !localStorage.getItem('currentSessionId')) {
+      const newSessionId = Date.now().toString();
+      setSessionId(newSessionId);
+      localStorage.setItem('currentSessionId', newSessionId);
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,21 +91,6 @@ const ChatPage = () => {
     setEmergencyDisabled(false);
   };
 
-  const attachConversation = async () => {
-    if (!sessionId) return;
-    try {
-      await axios.post('http://localhost:5000/api/patient/attach-conversation', { sessionId }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Conversation sauvegardée dans votre espace patient !');
-      setShowInvite(false);
-    } catch (err) {
-      console.error(err);
-      alert('Erreur lors du rattachement');
-    }
-  };
-
-  // Nouvelle fonction d'urgence manuelle
   const handleEmergency = async () => {
     if (!sessionId) {
       alert("Veuillez d'abord envoyer un message pour démarrer une session.");
@@ -113,13 +106,11 @@ const ChatPage = () => {
         summary: esoSummary
       }, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
       alert("Alerte envoyée. Un agent va vous contacter rapidement.");
-      // Ajouter la réponse du bot dans le chat
       setMessages(prev => [...prev, { text: response.data.reply, sender: 'bot' }]);
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de l'envoi de l'alerte. Veuillez réessayer.");
+      alert("Erreur lors de l'envoi de l'alerte.");
     } finally {
-      // Réactiver après 5 secondes
       setTimeout(() => setEmergencyDisabled(false), 5000);
     }
   };
@@ -173,18 +164,6 @@ const ChatPage = () => {
               <p>{locError}</p>
               <button onClick={() => window.location.reload()}>Recharger</button>
             </div>
-          )}
-          {showInvite && (
-            <div className="invite-banner">
-              <p>💾 Sauvegardez cette conversation et accédez à votre historique en vous connectant ou en créant un compte.</p>
-              <button onClick={() => navigate('/login')}>Se connecter</button>
-              <button onClick={() => navigate('/register')}>Créer un compte</button>
-            </div>
-          )}
-          {isAuthenticated && sessionId && (
-            <button className="attach-btn" onClick={attachConversation}>
-              Rattacher cette conversation à mon compte
-            </button>
           )}
         </div>
       </div>
