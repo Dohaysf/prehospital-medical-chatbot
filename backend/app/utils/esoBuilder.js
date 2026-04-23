@@ -1,11 +1,30 @@
 // backend/app/utils/esoBuilder.js
 class ESOBuilder {
   constructor() {
+    // Initialisation à ZÉRO
     this.data = {};
   }
 
+  // Méthode pour réinitialiser complètement le builder
+  reset() {
+    this.data = {};
+    console.log('🔄 ESOBuilder réinitialisé');
+    return this.data;
+  }
+
   update(newInfo) {
-    Object.assign(this.data, newInfo);
+    if (!newInfo) return this.data;
+    
+    // Ne mettre à jour que les champs qui sont vraiment fournis
+    Object.keys(newInfo).forEach(key => {
+      const value = newInfo[key];
+      // Ignorer les valeurs null/undefined/vides
+      if (value !== null && value !== undefined && value !== '') {
+        this.data[key] = value;
+      }
+    });
+    
+    // Recalculer la sévérité
     this.data.severity = this.calculateSeverity();
     return this.data;
   }
@@ -17,9 +36,11 @@ class ESOBuilder {
 
     // Règles critiques
     if (s.symptom === 'douleur' && s.bodyPart === 'poitrine') return 'critique';
-    if (s.symptom === 'dyspnée') return 'critique';
+    if (s.symptom === 'dyspnee') return 'critique';
     if (s.symptom === 'saignement') return 'critique';
     if (s.symptom === 'perte_connaissance') return 'critique';
+    if (s.symptom === 'traumatisme') return 'critique';
+    if (s.symptom === 'brulure') return 'critique';
     if (intensity >= 8) return 'critique';
     if (intensity >= 5 && duration > 24) return 'critique';
     if (intensity >= 5) return 'moyenne';
@@ -29,7 +50,12 @@ class ESOBuilder {
   }
 
   getSummary() {
-    return this.data;
+    return { ...this.data };
+  }
+
+  // Vérifier si un champ est présent
+  has(field) {
+    return !!this.data[field];
   }
 
   // Ajout de localisation structurée

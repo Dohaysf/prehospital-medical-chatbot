@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // ← Ajout pour l’appel manuel
+import axios from 'axios'; 
 import PublicLayout from '../../../components/LayoutPublic/PublicLayout';
 import Message from '../../../components/Message/Message';
 import Input from '../../../components/Input/Input';
@@ -27,7 +27,7 @@ const PublicChatPage = () => {
   const [loading, setLoading] = useState(false);
   const [esoSummary, setEsoSummary] = useState({});
   const [inputValue, setInputValue] = useState('');
-  const [emergencyDisabled, setEmergencyDisabled] = useState(false); // ← État pour désactiver le bouton
+  const [emergencyDisabled, setEmergencyDisabled] = useState(false);
   const messagesEndRef = useRef(null);
   const { speak } = useSpeechSynthesis();
   const { location, loading: locLoading, error: locError, getLocation, resetError } = useGeolocation();
@@ -70,16 +70,38 @@ const PublicChatPage = () => {
     getLocation();
   };
 
-  const resetConversation = () => {
+  // ========== FONCTION RÉINITIALISATION CORRIGÉE ==========
+  const resetConversation = async () => {
+    // 1. Nettoyer la session sur le backend
+    if (sessionId) {
+      try {
+        await axios.post('http://localhost:5000/api/chat/reset-session', { 
+          sessionId: sessionId 
+        });
+        console.log('✅ Session backend nettoyée');
+      } catch (err) {
+        console.error("Erreur nettoyage session:", err);
+      }
+    }
+    
+    // 2. Générer une NOUVELLE sessionId
+    const newSessionId = Date.now().toString();
+    
+    // 3. Réinitialiser tous les états locaux
     setMessages([{ text: getWelcomeMessage(), sender: 'bot' }]);
-    setSessionId(null);
     setEsoSummary({});
-    localStorage.removeItem('currentSessionId');
+    setSessionId(newSessionId);
+    localStorage.setItem('currentSessionId', newSessionId);
+    setInputValue('');
+    
+    // 4. Réinitialiser les autres états
     window.speechSynthesis?.cancel();
     locationSentRef.current = false;
     setLocationSentInThisConversation(false);
     resetError();
-    setEmergencyDisabled(false); // ← Réactiver le bouton si besoin
+    setEmergencyDisabled(false);
+    
+    console.log('🔄 Nouvelle conversation créée, ID:', newSessionId);
   };
 
   const handleAttach = async () => {
@@ -98,7 +120,6 @@ const PublicChatPage = () => {
     }
   };
 
-  // === NOUVELLE FONCTION D’URGENCE MANUELLE ===
   const handleEmergency = async () => {
     if (!sessionId) {
       alert("Veuillez d'abord envoyer un message pour démarrer une session.");
@@ -114,13 +135,11 @@ const PublicChatPage = () => {
         summary: esoSummary
       });
       alert("Alerte envoyée. Un agent va vous contacter rapidement.");
-      // Ajouter la réponse du bot dans le chat
       setMessages(prev => [...prev, { text: response.data.reply, sender: 'bot' }]);
     } catch (err) {
       console.error(err);
       alert("Erreur lors de l'envoi de l'alerte. Veuillez réessayer.");
     } finally {
-      // Réactiver après 5 secondes
       setTimeout(() => setEmergencyDisabled(false), 5000);
     }
   };
@@ -128,7 +147,6 @@ const PublicChatPage = () => {
   return (
     <PublicLayout>
       <div className="public-chat-page">
-        {/* Bandeau d'information publique */}
         <div className="public-badge">
           <span>🔓 Consultation publique et anonyme</span>
           {!isAuthenticated && (
@@ -139,7 +157,6 @@ const PublicChatPage = () => {
         </div>
 
         <div className="chat-layout">
-          {/* Zone principale de chat */}
           <div className="chat-main">
             <div className="chat-header">
               <h2>💬 Consultation express</h2>
@@ -169,7 +186,6 @@ const PublicChatPage = () => {
                 >
                   {locLoading ? '⏳' : '📍'}
                 </button>
-                {/* === BOUTON D’URGENCE === */}
                 <button
                   className="emergency-button"
                   onClick={handleEmergency}
@@ -192,7 +208,6 @@ const PublicChatPage = () => {
               )}
             </div>
 
-            {/* Section de rattachement (visible seulement si session en cours) */}
             {sessionId && (
               <div className="attach-section">
                 {!isAuthenticated ? (
@@ -213,7 +228,6 @@ const PublicChatPage = () => {
             )}
           </div>
 
-          {/* Sidebar droite : résumé médical */}
           <div className="chat-sidebar">
             <ESOSummary summary={esoSummary} />
           </div>

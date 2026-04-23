@@ -31,7 +31,6 @@ const PatientChat = () => {
   const { location, loading: locLoading, error: locError, getLocation, resetError } = useGeolocation();
   const [locationSentInThisConversation, setLocationSentInThisConversation] = useState(false);
 
-  // Création automatique d'une session au chargement
   useEffect(() => {
     if (!sessionId && !localStorage.getItem('currentSessionId')) {
       const newSessionId = Date.now().toString();
@@ -77,19 +76,40 @@ const PatientChat = () => {
     getLocation();
   };
 
-  const resetConversation = () => {
+  // ========== FONCTION RÉINITIALISATION CORRIGÉE ==========
+  const resetConversation = async () => {
+    // 1. Nettoyer la session sur le backend
+    if (sessionId) {
+      try {
+        await axios.post('http://localhost:5000/api/chat/reset-session', { 
+          sessionId: sessionId 
+        });
+        console.log('✅ Session backend nettoyée');
+      } catch (err) {
+        console.error("Erreur nettoyage session:", err);
+      }
+    }
+    
+    // 2. Générer une NOUVELLE sessionId
+    const newSessionId = Date.now().toString();
+    
+    // 3. Réinitialiser tous les états locaux
     setMessages([{ text: getWelcomeMessage(), sender: 'bot' }]);
-    setSessionId(null);
     setEsoSummary({});
-    localStorage.removeItem('currentSessionId');
+    setSessionId(newSessionId);
+    localStorage.setItem('currentSessionId', newSessionId);
+    setInputValue('');
+    
+    // 4. Réinitialiser les autres états
     window.speechSynthesis?.cancel();
     locationSentRef.current = false;
     setLocationSentInThisConversation(false);
     resetError();
     setEmergencyDisabled(false);
+    
+    console.log('🔄 Nouvelle conversation créée, ID:', newSessionId);
   };
 
-  // Fonction d'urgence manuelle
   const handleEmergency = async () => {
     if (!sessionId) {
       alert("Veuillez d'abord envoyer un message pour démarrer une session.");

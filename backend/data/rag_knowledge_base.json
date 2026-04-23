@@ -1,0 +1,66 @@
+{
+  "douleur_poitrine": {
+    "conseil": "Restez calme, ne bougez pas brusquement. Appelez immédiatement le SAMU (141) ou le 112.",
+    "urgence": true,
+    "priority": 1,
+    "mots_cles": ["poitrine", "thorax", "cardiaque", "coeur", "oppression"],
+    "question_secours": "Avez-vous des difficultés à respirer ou des sueurs froides ?",
+    "source": "Protocole SAMU"
+  },
+  "respiration": {
+    "conseil": "Asseyez-vous en position demi-assise. Appelez le 141 immédiatement.",
+    "urgence": true,
+    "priority": 1,
+    "mots_cles": ["respire", "essoufflement", "souffle", "asthme"],
+    "question_secours": "Depuis combien de temps avez-vous du mal à respirer ?",
+    "source": "Protocole SAMU"
+  },
+  "accident": {
+    "conseil": "Ne déplacez pas la personne blessée. Appelez le 141.",
+    "urgence": true,
+    "priority": 1,
+    "mots_cles": ["accident", "chute", "traumatisme", "blessure"],
+    "question_secours": "La personne est-elle consciente ?",
+    "source": "Protocole SAMU"
+  },
+  "saignement": {
+    "conseil": "Appliquez une pression directe sur la plaie. Appelez le 141.",
+    "urgence": true,
+    "priority": 1,
+    "mots_cles": ["saigne", "sang", "hémorragie", "coupure"],
+    "question_secours": "Le saignement est-il abondant ?",
+    "source": "Protocole SAMU"
+  },
+  "brulure": {
+    "conseil": "Refroidissez la brûlure à l'eau tiède pendant 15-20 minutes.",
+    "urgence": true,
+    "priority": 2,
+    "mots_cles": ["brûlure", "brulure", "feu", "eau chaude"],
+    "question_secours": "La brûlure est-elle profonde ?",
+    "source": "Protocole SAMU"
+  },
+  "fievre": {
+    "conseil": "Donnez du paracétamol si possible. Consultez un médecin si la fièvre dépasse 40°C.",
+    "urgence": false,
+    "priority": 3,
+    "mots_cles": ["fièvre", "température", "chaud", "frissons"],
+    "question_secours": "La personne a-t-elle des convulsions ?",
+    "source": "Protocole SAMU"
+  },
+  "mal_tete": {
+    "conseil": "Reposez-vous dans un endroit calme et sombre. Hydratez-vous.",
+    "urgence": false,
+    "priority": 3,
+    "mots_cles": ["tête", "migraine", "céphalée", "mal de tête"],
+    "question_secours": "La douleur est-elle soudaine et très intense ?",
+    "source": "Protocole SAMU"
+  },
+  "douleur_ventre": {
+    "conseil": "Ne donnez rien à manger ni à boire. Consultez un médecin rapidement.",
+    "urgence": false,
+    "priority": 3,
+    "mots_cles": ["ventre", "abdomen", "estomac", "nausée"],
+    "question_secours": "La douleur est-elle localisée en bas à droite ?",
+    "source": "Protocole SAMU"
+  }
+}
